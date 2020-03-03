@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { isSignedIn, signIn } from '../services/auth-service'
 
 export default class Login extends Component{
 
@@ -11,8 +12,17 @@ export default class Login extends Component{
         }
     }
 
+    //Ao montar a página, verifica se já existe um usuário logado com session
+    //se existir, substitui a página atual com replace() pela Home
+    componentDidMount = async () =>{
+        const session = await isSignedIn()
+        if(session.usuario){
+            this.props.navigation.replace('Home')
+        }
+    }
+
     //Método para definir todas as ações no evento de entrada
-    entrar = (e) =>{
+    entrar = async (e) =>{
 
         //O return vazio encerra a thread do código
         if(!this.validar()) return
@@ -24,6 +34,12 @@ export default class Login extends Component{
         //alert(this.state.email)
 
         //envio dos dados para a API
+        const usuario = this.state
+        const response = await signIn(usuario)
+
+        if(response.ok){
+            this.props.navigation.replace('Home')
+        }
     }
 
     //Método para definir as ações no evento de cadastro

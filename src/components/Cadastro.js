@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, AsyncStorage } from 'react-native';
+import {cadastrar as cadastrarUsuario} from '../services/auth-service'
 
 export default class Cadastro extends Component{
 
@@ -17,51 +18,38 @@ export default class Cadastro extends Component{
         //Se não estiver validado, para o código com o return
         if(!this.validar()) return
 
-        const {email, senha} = this.state
+        //Recebendo os dados do state (email e senha) na variável usuário
+        const usuario = this.state
 
-        const params = {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json'
-            },
-            //Atributos como nome, sexo e CPF estão sendo passados de forma fixa para rapidez de aprendizado
-            body: JSON.stringify({
-                email: email,
-                senha: senha,
-                nome: 'Roberto Silva do Teste',
-                sexo: 'M',
-                cpf: '15989669856'
-            })
-        } 
+        //Deixando parâmetros fixos que não estão no state
+        usuario.nome = 'Roberto Silva do Teste',
+        usuario.sexo = 'M',
+        usuario.cpf = '15989669856'
 
-        //Método para realizar requisições assíncronas
-        //espera como obrigatório a URI e possui outros parâmetros não obrigatórios
-        //passando parâmetros por variável params
-        //O fetch() já implementa uma Promise, podendo utilizar async e await
-        //Sempre que utilizar Promise utilizar o try catch, (principalmente quando utilizado async await)
         try{
-            const retorno = await fetch('http://10.107.144.35:3000/registrar', params)
-            console.log(retorno)
+            const response = await cadastrarUsuario(usuario)
 
             //O atributo ok é retornado quando o status está entre 200 e 299
-            if(!retorno.ok){
+            if(!response.ok){
                 return Alert.alert('Erro ao cadastrar')
             }
 
-            //Atribuindo somente o body() do retorno da requisição para as respectivas variáveis transformando em json(), ele vem em texto do http
-            const { usuario, token } = await retorno.json()
-
             Alert.alert('Cadastrado com sucesso')
-        
-            //Criação de um espaço no webStorage para armazenar o token retornado
-            AsyncStorage.setItem('token', token)
-
-            //Redirecionar o usuário para o caso de ter gravado as informações
-            this.props.navigation.navigate('Home', {nome: usuario.nome})
 
         }catch(erro){
             console.log(erro)
         }
+
+        //Refatorado em 03/03, quando criados arquivos doRequest e auth-service
+        //Atribuindo somente o body() do retorno da requisição para as respectivas variáveis transformando em json(), ele vem em texto do http
+        //const { usuario, token } = await retorno.json()
+    
+        //Refatorado em 03/03, quando criados arquivos doRequest e auth-service
+        //Criação de um espaço no webStorage para armazenar o token retornado
+        //AsyncStorage.setItem('token', token)
+
+        //Redirecionar o usuário para o caso de ter gravado as informações
+        this.props.navigation.navigate('Home')
 
     }
 
